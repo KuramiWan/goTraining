@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"github.com/hajimehoshi/ebiten/v2"
+	"math"
 )
 
 //go:embed assets
@@ -17,8 +18,11 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
-	//options.GeoM.Translate(150, 200)
-	//options.GeoM.Rotate(25.0 * math.Pi / 180)
+	width, height := PlaySprite.Bounds().Dx(), PlaySprite.Bounds().Dy()
+	halfW, halfH := float64(width/2), float64(height/2)
+	options.GeoM.Translate(-halfW, -halfH)
+	options.GeoM.Rotate(45.0 * math.Pi / 180)
+	//options.GeoM.Translate(halfW, halfH)
 	//options.GeoM.Scale(1, -1)
 	screen.DrawImage(PlaySprite, options)
 }
