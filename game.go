@@ -2,13 +2,11 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
-	"path"
 )
 
 //go:embed assets
-var assets embed.FS
+var data embed.FS
 
 type Game struct {
 }
@@ -18,7 +16,11 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.DrawImage(PlaySprite, nil)
+	options := &ebiten.DrawImageOptions{}
+	//options.GeoM.Translate(150, 200)
+	//options.GeoM.Rotate(25.0 * math.Pi / 180)
+	//options.GeoM.Scale(1, -1)
+	screen.DrawImage(PlaySprite, options)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -26,7 +28,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func main() {
-	fmt.Println(path.Join("Sprite/playerShip1_blue.png"))
 	//open, err := assets.Open("Sprite/playerShip1_blue.png")
 	//if err != nil {
 	//	panic(err)
