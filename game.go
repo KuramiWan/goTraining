@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/hajimehoshi/ebiten/v2"
 	"math"
+	"time"
 )
 
 //go:embed assets
@@ -16,9 +17,47 @@ type Vector struct {
 
 type Game struct {
 	playPosition Vector
+	attackTimer  Timer
+}
+
+type Timer struct {
+	currentTicks int
+	targetTicks  int
+}
+
+func NewTimer(duration time.Duration) Timer {
+	return Timer{
+		currentTicks: 0,
+		targetTicks:  int(duration.Milliseconds()) * ebiten.TPS() / 1000,
+	}
 }
 
 func (g *Game) Update() error {
+	g.movement()
+	g.attackTimer.Update()
+
+	if g.attackTimer.IsReadyAttack() {
+		g.attackTimer.RestTicks()
+		//attack
+	}
+	return nil
+}
+
+func (t Timer) Update() {
+	if t.currentTicks < t.targetTicks {
+		t.currentTicks++
+	}
+}
+
+func (t Timer) RestTicks() {
+	t.currentTicks = 0
+}
+
+func (t Timer) IsReadyAttack() bool {
+	return t.currentTicks >= t.targetTicks
+}
+
+func (g *Game) movement() {
 	speed := 5.0
 	var vector Vector
 	if vector.X != 0 || vector.Y != 0 {
@@ -38,7 +77,6 @@ func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
 		g.playPosition.X += speed
 	}
-	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -62,6 +100,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 func main() {
 	g := &Game{
 		playPosition: Vector{X: 100, Y: 100},
+		attackTimer:  NewTimer(5 * time.Second),
 	}
 
 	//open, err := assets.Open("Sprite/playerShip1_blue.png")
