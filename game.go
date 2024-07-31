@@ -3,21 +3,15 @@ package main
 import (
 	"embed"
 	"github.com/hajimehoshi/ebiten/v2"
-	"math"
 	"time"
 )
 
 //go:embed assets
 var data embed.FS
 
-type Vector struct {
-	X float64
-	Y float64
-}
-
 type Game struct {
-	playPosition Vector
-	attackTimer  Timer
+	player      Player
+	attackTimer Timer
 }
 
 type Timer struct {
@@ -33,9 +27,8 @@ func NewTimer(duration time.Duration) Timer {
 }
 
 func (g *Game) Update() error {
-	g.movement()
+	g.player.Update()
 	g.attackTimer.Update()
-
 	if g.attackTimer.IsReadyAttack() {
 		g.attackTimer.RestTicks()
 		//attack
@@ -57,40 +50,18 @@ func (t Timer) IsReadyAttack() bool {
 	return t.currentTicks >= t.targetTicks
 }
 
-func (g *Game) movement() {
-	speed := 5.0
-	var vector Vector
-	if vector.X != 0 || vector.Y != 0 {
-		factor := speed / math.Sqrt(vector.X*vector.X+vector.Y*vector.Y)
-		vector.X *= factor
-		vector.Y *= factor
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		g.playPosition.Y -= speed
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		g.playPosition.Y += speed
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		g.playPosition.X -= speed
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.playPosition.X += speed
-	}
-}
-
 func (g *Game) Draw(screen *ebiten.Image) {
-
-	options := &ebiten.DrawImageOptions{}
+	//options := &ebiten.DrawImageOptions{}
 	//width, height := PlaySprite.Bounds().Dx(), PlaySprite.Bounds().Dy()
 	//halfW, halfH := float64(width/2), float64(height/2)
 	//options.GeoM.Translate(-halfW, -halfH)
 	//options.GeoM.Rotate(45.0 * math.Pi / 180)
 	//m := colorm.ColorM{}
 	//m.Translate(1, 1, 1, 1)
-	options.GeoM.Translate(g.playPosition.X, g.playPosition.Y)
+	//options.GeoM.Translate(g.playPosition.X, g.playPosition.Y)
 	//options.GeoM.Scale(1, -1)
-	screen.DrawImage(PlaySprite, options)
+	//screen.DrawImage(PlaySprite, options)
+	g.player.Draw(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -99,10 +70,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func main() {
 	g := &Game{
-		playPosition: Vector{X: 100, Y: 100},
-		attackTimer:  NewTimer(5 * time.Second),
+		attackTimer: NewTimer(5 * time.Second),
+		player:      newPlayer(),
 	}
-
 	//open, err := assets.Open("Sprite/playerShip1_blue.png")
 	//if err != nil {
 	//	panic(err)
