@@ -10,6 +10,14 @@ type Vector struct {
 	Y float64
 }
 
+func (v Vector) giNormalize() {
+	magnitude := math.Sqrt(v.X*v.X + v.Y*v.Y)
+	if magnitude != 0 {
+		v.X /= magnitude
+		v.Y /= magnitude
+	}
+}
+
 type Player struct {
 	playPosition Vector
 	sprite       *ebiten.Image
