@@ -10,8 +10,9 @@ import (
 var data embed.FS
 
 type Game struct {
-	player      Player
-	attackTimer Timer
+	player           Player
+	meteorSpawnTimer Timer
+	meteors          []Meteor
 }
 
 type Timer struct {
@@ -28,10 +29,14 @@ func NewTimer(duration time.Duration) Timer {
 
 func (g *Game) Update() error {
 	g.player.Update()
-	g.attackTimer.Update()
-	if g.attackTimer.IsReadyAttack() {
-		g.attackTimer.RestTicks()
-		//attack
+	g.meteorSpawnTimer.Update()
+	if g.meteorSpawnTimer.IsReadyAttack() {
+		g.meteorSpawnTimer.RestTicks()
+		meteor := newMeteor()
+		g.meteors = append(g.meteors, meteor)
+	}
+	for _, meteor := range g.meteors {
+		meteor.Update()
 	}
 	return nil
 }
@@ -62,6 +67,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	//options.GeoM.Scale(1, -1)
 	//screen.DrawImage(PlaySprite, options)
 	g.player.Draw(screen)
+	for _, meteor := range g.meteors {
+		meteor.Draw(screen)
+	}
 }
 
 const (
@@ -74,9 +82,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
+	var meteors = make([]Meteor, 0)
 	g := &Game{
-		attackTimer: NewTimer(5 * time.Second),
-		player:      newPlayer(),
+		meteorSpawnTimer: NewTimer(5 * time.Second),
+		player:           newPlayer(),
+		meteors:          meteors,
 	}
 	//open, err := assets.Open("Sprite/playerShip1_blue.png")
 	//if err != nil {
