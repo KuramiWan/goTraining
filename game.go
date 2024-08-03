@@ -10,9 +10,9 @@ import (
 var data embed.FS
 
 type Game struct {
-	player           Player
-	meteorSpawnTimer Timer
-	meteors          []Meteor
+	player           *Player
+	meteorSpawnTimer *Timer
+	meteors          []*Meteor
 }
 
 type Timer struct {
@@ -20,8 +20,8 @@ type Timer struct {
 	targetTicks  int
 }
 
-func NewTimer(duration time.Duration) Timer {
-	return Timer{
+func NewTimer(duration time.Duration) *Timer {
+	return &Timer{
 		currentTicks: 0,
 		targetTicks:  int(duration.Milliseconds()) * ebiten.TPS() / 1000,
 	}
@@ -41,17 +41,17 @@ func (g *Game) Update() error {
 	return nil
 }
 
-func (t Timer) Update() {
+func (t *Timer) Update() {
 	if t.currentTicks < t.targetTicks {
 		t.currentTicks++
 	}
 }
 
-func (t Timer) RestTicks() {
+func (t *Timer) RestTicks() {
 	t.currentTicks = 0
 }
 
-func (t Timer) IsReadyAttack() bool {
+func (t *Timer) IsReadyAttack() bool {
 	return t.currentTicks >= t.targetTicks
 }
 
@@ -82,7 +82,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
-	var meteors = make([]Meteor, 0)
+	var meteors = make([]*Meteor, 0)
 	g := &Game{
 		meteorSpawnTimer: NewTimer(5 * time.Second),
 		player:           newPlayer(),

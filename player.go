@@ -10,12 +10,13 @@ type Vector struct {
 	Y float64
 }
 
-func (v Vector) giNormalize() {
+func (v Vector) Normalize() Vector {
 	magnitude := math.Sqrt(v.X*v.X + v.Y*v.Y)
 	if magnitude != 0 {
 		v.X /= magnitude
 		v.Y /= magnitude
 	}
+	return v
 }
 
 type Player struct {
@@ -24,11 +25,11 @@ type Player struct {
 	rotation     float64
 }
 
-func newPlayer() Player {
+func newPlayer() *Player {
 	sprite := PlaySprite
 	HalfW := sprite.Bounds().Dx()
 	HalfH := sprite.Bounds().Dy()
-	return Player{
+	return &Player{
 		playPosition: Vector{X: float64(ScreenWidth-HalfW) / 2, Y: float64(ScreenHeight-HalfH) / 2},
 		sprite:       sprite,
 	}
