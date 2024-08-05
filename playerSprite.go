@@ -10,8 +10,8 @@ import (
 
 var PlaySprite = mustLoadImage("Sprite/playerShip1_blue.png")
 
-func mustLoadImage(name string) *ebiten.Image {
-	p, err := data.Open(path.Join("assets", name))
+func mustLoadImage(n string) *ebiten.Image {
+	p, err := data.Open(path.Join("assets", n))
 	if err != nil {
 		panic(err)
 	}

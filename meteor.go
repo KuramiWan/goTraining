@@ -19,12 +19,12 @@ var target = Vector{
 }
 
 func (m *Meteor) Update() {
-
 	m.position.X += m.movement.X
 	m.position.Y += m.movement.Y
+
 }
 
-func (m *Meteor) Draw(screen *ebiten.Image) {
+func (m *Meteor) Draw(I *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
 	bounds := m.sprite.Bounds()
 	halfW := float64(bounds.Dx()) / 2
@@ -33,7 +33,7 @@ func (m *Meteor) Draw(screen *ebiten.Image) {
 	options.GeoM.Rotate(m.rotationSpeed)
 	options.GeoM.Translate(halfW, halfH)
 	options.GeoM.Translate(m.position.X, m.position.Y)
-	screen.DrawImage(m.sprite, options)
+	I.DrawImage(m.sprite, options)
 
 }
 

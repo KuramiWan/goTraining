@@ -40,7 +40,7 @@ func (p *Player) Update() {
 	p.rotate()
 }
 
-func (p *Player) Draw(screen *ebiten.Image) {
+func (p *Player) Draw(s *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
 	bounds := p.sprite.Bounds()
 	halfW := float64(bounds.Dx()) / 2
@@ -49,7 +49,7 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	options.GeoM.Rotate(p.rotation)
 	options.GeoM.Translate(halfW, halfH)
 	options.GeoM.Translate(p.playPosition.X, p.playPosition.Y)
-	screen.DrawImage(p.sprite, options)
+	s.DrawImage(p.sprite, options)
 }
 
 // update
