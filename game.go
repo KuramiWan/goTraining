@@ -14,11 +14,6 @@ type Game struct {
 	bullets *Bullets
 }
 
-type Timer struct {
-	currentTicks int
-	targetTicks  int
-}
-
 const (
 	ScreenWidth  = 800
 	ScreenHeight = 600

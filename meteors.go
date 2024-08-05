@@ -27,26 +27,6 @@ func (meteors *Meteors) Draw(s *ebiten.Image) {
 		meteor.Draw(s)
 	}
 }
-
-func (t *Timer) UpdateTicks() {
-	if t.currentTicks < t.targetTicks {
-		t.currentTicks++
-	}
-}
-
-func (t *Timer) RestTicks() {
-	t.currentTicks = 0
-}
-
-func (t *Timer) IsReadyAttack() bool {
-	return t.currentTicks >= t.targetTicks
-}
 func newMeteors() *Meteors {
 	return &Meteors{make([]*Meteor, 0), NewTimer(5 * time.Second)}
-}
-func NewTimer(duration time.Duration) *Timer {
-	return &Timer{
-		currentTicks: 0,
-		targetTicks:  int(duration.Milliseconds()) * ebiten.TPS() / 1000,
-	}
 }
