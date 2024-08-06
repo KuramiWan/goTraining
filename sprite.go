@@ -3,11 +3,34 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image"
+	_ "image/png"
 	"io/fs"
 	"path"
 )
 
+var PlaySprite = mustLoadImage("Sprite/playerShip1_blue.png")
+
 var MeteorSprites = mustLoadImages("assets/PNG/Meteors")
+
+var LaserSprite = mustLoadImage("PNG/Lasers/laserBlue01.png")
+
+func mustLoadImage(n string) *ebiten.Image {
+	p, err := data.Open(path.Join("assets", n))
+	if err != nil {
+		panic(err)
+	}
+	defer func(p fs.File) {
+		err := p.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(p)
+	img, _, err := image.Decode(p)
+	if err != nil {
+		panic(err)
+	}
+	return ebiten.NewImageFromImage(img)
+}
 
 func mustLoadImages(n string) []*ebiten.Image {
 	dir := getDir(n)

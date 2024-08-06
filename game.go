@@ -11,7 +11,6 @@ var data embed.FS
 type Game struct {
 	player  *Player
 	meteors *Meteors
-	bullets *Bullets
 }
 
 const (
@@ -22,7 +21,7 @@ const (
 func (g *Game) Update() error {
 	g.player.Update()
 	//g.bulletColdTimer.Update()
-	g.bullets.Update()
+
 	g.meteors.Update()
 	return nil
 }
@@ -39,7 +38,6 @@ func (g *Game) Draw(s *ebiten.Image) {
 	//options.GeoM.Scale(1, -1)
 	//s.DrawImage(PlaySprite, options)
 	g.player.Draw(s)
-	g.bullets.Draw(s)
 	g.meteors.Draw(s)
 }
 

@@ -23,21 +23,27 @@ type Player struct {
 	playPosition Vector
 	sprite       *ebiten.Image
 	rotation     float64
+	bullets      []*Bullets
 }
 
 func newPlayer() *Player {
 	sprite := PlaySprite
 	HalfW := sprite.Bounds().Dx()
 	HalfH := sprite.Bounds().Dy()
-	return &Player{
+	p := &Player{
 		playPosition: Vector{X: float64(ScreenWidth-HalfW) / 2, Y: float64(ScreenHeight-HalfH) / 2},
 		sprite:       sprite,
 	}
+	p.bullets = newBullets(p)
+	return p
 }
 
 func (p *Player) Update() {
 	p.movement()
 	p.rotate()
+	for _, bullet := range p.bullets {
+		bullet.Update()
+	}
 }
 
 func (p *Player) Draw(s *ebiten.Image) {
@@ -50,6 +56,9 @@ func (p *Player) Draw(s *ebiten.Image) {
 	options.GeoM.Translate(halfW, halfH)
 	options.GeoM.Translate(p.playPosition.X, p.playPosition.Y)
 	s.DrawImage(p.sprite, options)
+	for _, bullet := range p.bullets {
+		bullet.Draw(s)
+	}
 }
 
 // update
