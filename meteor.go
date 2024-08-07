@@ -21,7 +21,6 @@ var target = Vector{
 func (m *Meteor) Update() {
 	m.position.X += m.movement.X
 	m.position.Y += m.movement.Y
-
 }
 
 func (m *Meteor) Draw(I *ebiten.Image) {
@@ -34,7 +33,6 @@ func (m *Meteor) Draw(I *ebiten.Image) {
 	options.GeoM.Translate(halfW, halfH)
 	options.GeoM.Translate(m.position.X, m.position.Y)
 	I.DrawImage(m.sprite, options)
-
 }
 
 func newMeteor() *Meteor {

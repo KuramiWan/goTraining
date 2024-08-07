@@ -3,36 +3,50 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"math"
-	"time"
 )
 
-type Bullets struct {
-	coldTimer Timer
-	position  Vector
-	sprite    *ebiten.Image
+const (
+	bulletSpeedPerSecond = 300
+)
+
+type Bullet struct {
+	position Vector
+	sprite   *ebiten.Image
+	rotation float64
 }
 
-func (b *Bullets) Update() {
-	b.coldTimer.UpdateTicks()
-	if b.coldTimer.IsReadyAttack() && ebiten.IsKeyPressed(ebiten.KeySpace) {
-		b.coldTimer.RestTicks()
-		// Do Attack
-	}
+func (b *Bullet) Update() {
+	speed := bulletSpeedPerSecond / float64(ebiten.TPS())
+	b.position.X += math.Sin(b.rotation) * speed
+	b.position.Y += -math.Cos(b.rotation) * speed
+
 }
 
-func (b *Bullets) Draw(s *ebiten.Image) {
-	sprite := LaserSprite
+func (b *Bullet) Draw(s *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
+	bounds := b.sprite.Bounds()
+	halfW := float64(bounds.Dx()) / 2
+	halfH := float64(bounds.Dy()) / 2
+	options.GeoM.Translate(-halfW, -halfH)
+	options.GeoM.Rotate(b.rotation)
+	options.GeoM.Translate(halfW, halfH)
 	options.GeoM.Translate(b.position.X, b.position.Y)
-	s.DrawImage(sprite, options)
+	s.DrawImage(b.sprite, options)
 }
 
-func newBullets(p *Player) *Bullets {
-	return &Bullets{
-		coldTimer: *NewTimer(1 * time.Second),
-		position: Vector{
-			X: p.playPosition.X + math.Cos(p.rotation)*float64(p.sprite.Bounds().Dx()/2.0),
-			Y: p.playPosition.Y + math.Sin(p.rotation)*float64(p.sprite.Bounds().Dy()/2.0),
-		},
+func newBullet(p Vector, r float64) *Bullet {
+	sprite := LaserSprite
+	halfW := float64(sprite.Bounds().Dx() / 2.0)
+	halfH := float64(sprite.Bounds().Dy() / 2.0)
+	p.Y -= halfH
+	p.X -= halfW
+	return &Bullet{
+		position: Vector{p.X, p.Y},
+		rotation: r,
+		sprite:   sprite,
 	}
+}
+
+func newBullets() []*Bullet {
+	return make([]*Bullet, 0)
 }

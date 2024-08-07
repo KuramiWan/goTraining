@@ -3,6 +3,11 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"math"
+	"time"
+)
+
+const (
+	bulletOffset = 50
 )
 
 type Vector struct {
@@ -23,7 +28,8 @@ type Player struct {
 	playPosition Vector
 	sprite       *ebiten.Image
 	rotation     float64
-	bullets      []*Bullets
+	bullets      []*Bullet
+	coldTimer    Timer
 }
 
 func newPlayer() *Player {
@@ -33,16 +39,27 @@ func newPlayer() *Player {
 	p := &Player{
 		playPosition: Vector{X: float64(ScreenWidth-HalfW) / 2, Y: float64(ScreenHeight-HalfH) / 2},
 		sprite:       sprite,
+		coldTimer:    *NewTimer(1 * time.Second),
+		bullets:      newBullets(),
 	}
-	p.bullets = newBullets(p)
+
 	return p
 }
 
 func (p *Player) Update() {
 	p.movement()
 	p.rotate()
-	for _, bullet := range p.bullets {
-		bullet.Update()
+	bounds := p.sprite.Bounds()
+	halfW := float64(bounds.Dx()) / 2
+	halfH := float64(bounds.Dy()) / 2
+	pos := Vector{p.playPosition.X + halfW + math.Sin(p.rotation)*bulletOffset, p.playPosition.Y + halfH - math.Cos(p.rotation)*bulletOffset}
+	p.coldTimer.UpdateTicks()
+	if p.coldTimer.IsReadyAttack() && ebiten.IsKeyPressed(ebiten.KeySpace) {
+		p.coldTimer.RestTicks()
+		p.bullets = append(p.bullets, newBullet(pos, p.rotation))
+	}
+	for _, b := range p.bullets {
+		b.Update()
 	}
 }
 
@@ -58,6 +75,9 @@ func (p *Player) Draw(s *ebiten.Image) {
 	s.DrawImage(p.sprite, options)
 	for _, bullet := range p.bullets {
 		bullet.Draw(s)
+	}
+	for _, b := range p.bullets {
+		b.Draw(s)
 	}
 }
 

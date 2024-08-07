@@ -6,7 +6,7 @@ import (
 )
 
 type Meteors struct {
-	array            []*Meteor
+	value            []*Meteor
 	meteorSpawnTimer *Timer
 }
 
@@ -15,15 +15,14 @@ func (meteors *Meteors) Update() {
 	if meteors.meteorSpawnTimer.IsReadyAttack() {
 		meteors.meteorSpawnTimer.RestTicks()
 		meteor := newMeteor()
-		meteors.array = append(meteors.array, meteor)
+		meteors.value = append(meteors.value, meteor)
 	}
-	for _, meteor := range meteors.array {
+	for _, meteor := range meteors.value {
 		meteor.Update()
 	}
 }
-
 func (meteors *Meteors) Draw(s *ebiten.Image) {
-	for _, meteor := range meteors.array {
+	for _, meteor := range meteors.value {
 		meteor.Draw(s)
 	}
 }
