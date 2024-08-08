@@ -50,3 +50,7 @@ func newBullet(p Vector, r float64) *Bullet {
 func newBullets() []*Bullet {
 	return make([]*Bullet, 0)
 }
+
+func (b *Bullet) Collider() *Rect {
+	return newRect(b.position, b.sprite)
+}

@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 	"image"
 	_ "image/png"
 	"io/fs"
@@ -13,6 +15,8 @@ var PlaySprite = mustLoadImage("Sprite/playerShip1_blue.png")
 var MeteorSprites = mustLoadImages("assets/PNG/Meteors")
 
 var LaserSprite = mustLoadImage("PNG/Lasers/laserBlue01.png")
+
+var ScoreFont = mustLoadFont("assets/font/Kenney Blocks.ttf")
 
 func mustLoadImage(n string) *ebiten.Image {
 	p, err := data.Open(path.Join("assets", n))
@@ -63,4 +67,24 @@ func getDir(d string) []fs.DirEntry {
 		return nil
 	}
 	return dir
+}
+
+func mustLoadFont(name string) font.Face {
+	file, err := data.ReadFile(name)
+	if err != nil {
+		panic(err)
+	}
+	tt, err := opentype.Parse(file)
+	if err != nil {
+		panic(err)
+	}
+	face, err := opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    48,
+		DPI:     72,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		panic(err)
+	}
+	return face
 }

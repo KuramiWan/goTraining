@@ -42,7 +42,6 @@ func newPlayer() *Player {
 		coldTimer:    *NewTimer(1 * time.Second),
 		bullets:      newBullets(),
 	}
-
 	return p
 }
 
@@ -112,4 +111,8 @@ func (p *Player) rotate() {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButton2) {
 		p.rotation += speed
 	}
+}
+
+func (p *Player) Collider() *Rect {
+	return newRect(p.playPosition, p.sprite)
 }

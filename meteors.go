@@ -29,3 +29,7 @@ func (meteors *Meteors) Draw(s *ebiten.Image) {
 func newMeteors() *Meteors {
 	return &Meteors{make([]*Meteor, 0), NewTimer(5 * time.Second)}
 }
+
+func (m *Meteor) Collider() *Rect {
+	return newRect(m.position, m.sprite)
+}
