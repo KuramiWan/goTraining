@@ -6,28 +6,35 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"image/color"
+	"time"
 )
 
 //go:embed assets
 var data embed.FS
 
 type Game struct {
-	player  *Player
-	meteors *Meteors
-	score   int
+	player    *Player
+	meteors   *Meteors
+	score     int
+	gameTimer time.Duration
 }
 
 const (
-	ScreenWidth  = 800
-	ScreenHeight = 600
+	ScreenWidth  = 1600
+	ScreenHeight = 900
 )
 
 func (g *Game) Update() error {
 	g.player.Update()
-	g.meteors.Update()
+	g.meteors.Update(g.gameTimer)
 	g.BulletCollisions()
 	g.MeteorCollisions()
+	g.UpdateGameTimer()
 	return nil
+}
+
+func (g *Game) UpdateGameTimer() {
+	g.gameTimer += 1 * time.Second
 }
 
 func (g *Game) MeteorCollisions() {
@@ -73,10 +80,12 @@ func (g *Game) Layout(ow, oh int) (int, int) {
 }
 
 func main() {
+	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
 	g := &Game{
-		player:  newPlayer(),
-		meteors: newMeteors(),
-		score:   0,
+		player:    newPlayer(),
+		meteors:   newMeteors(),
+		score:     0,
+		gameTimer: 0,
 	}
 	err := ebiten.RunGame(g)
 	if err != nil {

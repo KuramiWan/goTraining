@@ -10,7 +10,16 @@ type Meteors struct {
 	meteorSpawnTimer *Timer
 }
 
-func (meteors *Meteors) Update() {
+const (
+	//first meteors generate
+	firstMeteors = 1 * time.Second
+)
+
+func (meteors *Meteors) Update(t time.Duration) {
+	if t == firstMeteors {
+		meteor := newMeteor()
+		meteors.value = append(meteors.value, meteor)
+	}
 	meteors.meteorSpawnTimer.UpdateTicks()
 	if meteors.meteorSpawnTimer.IsReadyAttack() {
 		meteors.meteorSpawnTimer.RestTicks()

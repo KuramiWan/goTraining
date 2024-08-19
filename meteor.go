@@ -40,8 +40,8 @@ func newMeteor() *Meteor {
 	r := ScreenWidth / 2.0
 	angle := rand.Float64() * 2 * math.Pi
 	p := Vector{
-		X: -target.X + r*math.Cos(angle),
-		Y: -target.Y + r*math.Sin(angle),
+		X: target.X + r*math.Cos(angle),
+		Y: target.Y + r*math.Sin(angle),
 	}
 	velocity := 0.5 + rand.Float64()*1.5
 	direction := Vector{X: target.X - p.X, Y: target.X - p.Y}
