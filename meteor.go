@@ -41,10 +41,10 @@ func newMeteor() *Meteor {
 	angle := rand.Float64() * 2 * math.Pi
 	p := Vector{
 		X: target.X + r*math.Cos(angle),
-		Y: target.Y + r*math.Sin(angle),
+		Y: -target.Y + r*math.Sin(angle),
 	}
-	velocity := 0.5 + rand.Float64()*1.5
-	direction := Vector{X: target.X - p.X, Y: target.X - p.Y}
+	velocity := 1.0 + rand.Float64()*1.5
+	direction := Vector{X: target.X - p.X, Y: target.Y - p.Y}
 	normalized := direction.Normalize()
 	move := Vector{X: normalized.X * velocity, Y: normalized.Y * velocity}
 	rotation := -0.02 + rand.Float64()*0.04

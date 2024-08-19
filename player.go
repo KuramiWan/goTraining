@@ -30,6 +30,7 @@ type Player struct {
 	rotation     float64
 	bullets      []*Bullet
 	coldTimer    Timer
+	speed        float64
 }
 
 func newPlayer() *Player {
@@ -46,7 +47,7 @@ func newPlayer() *Player {
 }
 
 func (p *Player) Update() {
-	p.movement()
+	move := p.movement()
 	p.rotate()
 	bounds := p.sprite.Bounds()
 	halfW := float64(bounds.Dx()) / 2
@@ -55,13 +56,12 @@ func (p *Player) Update() {
 	p.coldTimer.UpdateTicks()
 	if p.coldTimer.IsReadyAttack() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.coldTimer.RestTicks()
-		p.bullets = append(p.bullets, newBullet(pos, p.rotation))
+		p.bullets = append(p.bullets, newBullet(pos, p.rotation, move))
 	}
 	for _, b := range p.bullets {
 		b.Update()
 	}
 }
-
 func (p *Player) Draw(s *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
 	bounds := p.sprite.Bounds()
@@ -80,27 +80,30 @@ func (p *Player) Draw(s *ebiten.Image) {
 	}
 }
 
-// update
-func (p *Player) movement() {
+// update return moved Vector
+func (p *Player) movement() Vector {
 	speed := 5.0
-	var vector Vector
-	if vector.X != 0 || vector.Y != 0 {
-		factor := speed / math.Sqrt(vector.X*vector.X+vector.Y*vector.Y)
-		vector.X *= factor
-		vector.Y *= factor
-	}
+	var move Vector
 	if ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW) {
-		p.playPosition.Y -= speed
+		move.Y -= speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyS) {
-		p.playPosition.Y += speed
+		move.Y += speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) {
-		p.playPosition.X -= speed
+		move.X -= speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD) {
-		p.playPosition.X += speed
+		move.X += speed
 	}
+	if move.X != 0 || move.Y != 0 {
+		factor := speed / math.Sqrt(move.X*move.X+move.Y*move.Y)
+		move.X *= factor
+		move.Y *= factor
+	}
+	p.playPosition.X += move.X
+	p.playPosition.Y += move.Y
+	return move
 }
 
 func (p *Player) rotate() {
