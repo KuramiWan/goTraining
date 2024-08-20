@@ -42,7 +42,7 @@ func newBullet(p Vector, r float64, move Vector) *Bullet {
 	p.Y -= halfH
 	p.X -= halfW
 	return &Bullet{
-		position:  Vector{p.X, p.Y},
+		position:  Vector{p.X, p.Y, 0, 0, 0, 0},
 		rotation:  r,
 		sprite:    sprite,
 		moveSpeed: move,

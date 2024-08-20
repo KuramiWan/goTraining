@@ -11,8 +11,12 @@ const (
 )
 
 type Vector struct {
-	X float64
-	Y float64
+	X  float64
+	Y  float64
+	Vx float64
+	Vy float64
+	Ax float64
+	Ay float64
 }
 
 func (v Vector) Normalize() Vector {
@@ -52,7 +56,7 @@ func (p *Player) Update() {
 	bounds := p.sprite.Bounds()
 	halfW := float64(bounds.Dx()) / 2
 	halfH := float64(bounds.Dy()) / 2
-	pos := Vector{p.playPosition.X + halfW + math.Sin(p.rotation)*bulletOffset, p.playPosition.Y + halfH - math.Cos(p.rotation)*bulletOffset}
+	pos := Vector{p.playPosition.X + halfW + math.Sin(p.rotation)*bulletOffset, p.playPosition.Y + halfH - math.Cos(p.rotation)*bulletOffset, 0, 0, 0, 0}
 	p.coldTimer.UpdateTicks()
 	if p.coldTimer.IsReadyAttack() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.coldTimer.RestTicks()
@@ -82,28 +86,41 @@ func (p *Player) Draw(s *ebiten.Image) {
 
 // update return moved Vector
 func (p *Player) movement() Vector {
-	speed := 5.0
-	var move Vector
-	if ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW) {
-		move.Y -= speed
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyS) {
-		move.Y += speed
-	}
+	//speed := 5.0
+	a := 1.2
+	move := &p.playPosition
+	const friction = 0.8
+
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) {
-		move.X -= speed
+		move.Ax += -a
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD) {
-		move.X += speed
+		move.Ax += a
 	}
-	if move.X != 0 || move.Y != 0 {
-		factor := speed / math.Sqrt(move.X*move.X+move.Y*move.Y)
-		move.X *= factor
-		move.Y *= factor
+
+	if ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW) {
+		move.Ay += -a
 	}
-	p.playPosition.X += move.X
-	p.playPosition.Y += move.Y
-	return move
+	if ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyS) {
+		move.Ay += a
+	}
+
+	move.Vx += move.Ax
+	move.Vy += move.Ay
+	move.X += move.Vx
+	move.Y += move.Vy
+	//if move.Vx != 0 || move.Vy != 0 {
+	//	factor := speed / math.Sqrt(move.Vx*move.Vx+move.Vy*move.Vy)
+	//	move.Vx *= factor
+	//	move.Vy *= factor
+	//}
+	move.Vx *= friction
+	move.Vy *= friction
+	move.Ax = 0
+	move.Ay = 0
+	p.playPosition = *move
+	movePos := Vector{move.Vx, move.Vy, 0, 0, 0, 0}
+	return movePos
 }
 
 func (p *Player) rotate() {
