@@ -6,4 +6,3 @@
 
 `mouse-right&left` --旋转 rotate
 
-[Play Online 在线游玩](http://8.138.24.218:8080/)
