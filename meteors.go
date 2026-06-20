@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,35 +10,29 @@ type Meteors struct {
 	meteorSpawnTimer *Timer
 }
 
-const (
-	//first meteors generate
-	firstMeteors = 1 * time.Second
-)
-
-func (meteors *Meteors) Update(t time.Duration) {
-	if t == firstMeteors {
-		meteor := newMeteor()
-		meteors.value = append(meteors.value, meteor)
+func (ms *Meteors) Update(spawnNow bool) {
+	if spawnNow {
+		ms.value = append(ms.value, newMeteor())
 	}
-	meteors.meteorSpawnTimer.UpdateTicks()
-	if meteors.meteorSpawnTimer.IsReadyAttack() {
-		meteors.meteorSpawnTimer.RestTicks()
-		meteor := newMeteor()
-		meteors.value = append(meteors.value, meteor)
+	ms.meteorSpawnTimer.UpdateTicks()
+	if ms.meteorSpawnTimer.IsReadyAttack() {
+		ms.meteorSpawnTimer.RestTicks()
+		ms.value = append(ms.value, newMeteor())
 	}
-	for _, meteor := range meteors.value {
+	for _, meteor := range ms.value {
 		meteor.Update()
 	}
 }
-func (meteors *Meteors) Draw(s *ebiten.Image) {
-	for _, meteor := range meteors.value {
+
+func (ms *Meteors) Draw(s *ebiten.Image) {
+	for _, meteor := range ms.value {
 		meteor.Draw(s)
 	}
 }
-func newMeteors() *Meteors {
-	return &Meteors{make([]*Meteor, 0), NewTimer(5 * time.Second)}
-}
 
-func (m *Meteor) Collider() *Rect {
-	return newRect(m.position, m.sprite)
+func newMeteors() *Meteors {
+	return &Meteors{
+		value:            make([]*Meteor, 0),
+		meteorSpawnTimer: NewTimer(5 * time.Second),
+	}
 }

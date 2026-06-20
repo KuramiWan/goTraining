@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
@@ -29,4 +29,15 @@ func NewTimer(duration time.Duration) *Timer {
 		currentTicks: 0,
 		targetTicks:  int(duration.Milliseconds()) * ebiten.TPS() / 1000,
 	}
+}
+
+func (t *Timer) SetDuration(duration time.Duration) {
+	t.targetTicks = int(duration.Milliseconds()) * ebiten.TPS() / 1000
+}
+
+func (t *Timer) Progress() float64 {
+	if t.targetTicks == 0 {
+		return 1.0
+	}
+	return float64(t.currentTicks) / float64(t.targetTicks)
 }

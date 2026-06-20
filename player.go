@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	bulletOffset = 50
+	bulletOffset  = 50
+	spreadDegrees = 70
 )
 
 type Vector struct {
@@ -29,12 +30,15 @@ func (v Vector) Normalize() Vector {
 }
 
 type Player struct {
-	playPosition Vector
-	sprite       *ebiten.Image
-	rotation     float64
-	bullets      []*Bullet
-	coldTimer    Timer
-	speed        float64
+	playPosition    Vector
+	sprite          *ebiten.Image
+	rotation        float64
+	bullets         []*Bullet
+	coldTimer       Timer
+	speed           float64
+	cdMultiplier    float64
+	extraSpread     int
+	piercingActive  bool
 }
 
 func newPlayer() *Player {
@@ -42,16 +46,20 @@ func newPlayer() *Player {
 	HalfW := sprite.Bounds().Dx()
 	HalfH := sprite.Bounds().Dy()
 	p := &Player{
-		playPosition: Vector{X: float64(ScreenWidth-HalfW) / 2, Y: float64(ScreenHeight-HalfH) / 2},
-		sprite:       sprite,
-		coldTimer:    *NewTimer(1 * time.Second),
-		bullets:      newBullets(),
+		playPosition:   Vector{X: float64(ScreenWidth-HalfW) / 2, Y: float64(ScreenHeight-HalfH) / 2},
+		sprite:         sprite,
+		coldTimer:      *NewTimer(1 * time.Second),
+		bullets:        newBullets(),
+		cdMultiplier:   1.0,
+		extraSpread:    0,
+		piercingActive: false,
 	}
 	return p
 }
 
 func (p *Player) Update() {
 	move := p.movement()
+	p.clampToScreen()
 	p.rotate()
 	bounds := p.sprite.Bounds()
 	halfW := float64(bounds.Dx()) / 2
@@ -60,12 +68,29 @@ func (p *Player) Update() {
 	p.coldTimer.UpdateTicks()
 	if p.coldTimer.IsReadyAttack() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.coldTimer.RestTicks()
-		p.bullets = append(p.bullets, newBullet(pos, p.rotation, move))
+		p.shoot(pos, move)
 	}
 	for _, b := range p.bullets {
 		b.Update()
 	}
 }
+
+func (p *Player) shoot(pos, move Vector) {
+	totalBullets := 1 + p.extraSpread
+	halfSpreadRad := (spreadDegrees / 2.0) * math.Pi / 180.0
+
+	for i := 0; i < totalBullets; i++ {
+		var angle float64
+		if totalBullets == 1 {
+			angle = p.rotation
+		} else {
+			t := float64(i) / float64(totalBullets-1)
+			angle = p.rotation - halfSpreadRad + 2*halfSpreadRad*t
+		}
+		p.bullets = append(p.bullets, newBullet(pos, angle, move, p.piercingActive))
+	}
+}
+
 func (p *Player) Draw(s *ebiten.Image) {
 	options := &ebiten.DrawImageOptions{}
 	bounds := p.sprite.Bounds()
@@ -79,14 +104,9 @@ func (p *Player) Draw(s *ebiten.Image) {
 	for _, bullet := range p.bullets {
 		bullet.Draw(s)
 	}
-	for _, b := range p.bullets {
-		b.Draw(s)
-	}
 }
 
-// update return moved Vector
 func (p *Player) movement() Vector {
-	//speed := 5.0
 	a := 1.2
 	move := &p.playPosition
 	const friction = 0.8
@@ -97,7 +117,6 @@ func (p *Player) movement() Vector {
 	if ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD) {
 		move.Ax += a
 	}
-
 	if ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW) {
 		move.Ay += -a
 	}
@@ -109,18 +128,19 @@ func (p *Player) movement() Vector {
 	move.Vy += move.Ay
 	move.X += move.Vx
 	move.Y += move.Vy
-	//if move.Vx != 0 || move.Vy != 0 {
-	//	factor := speed / math.Sqrt(move.Vx*move.Vx+move.Vy*move.Vy)
-	//	move.Vx *= factor
-	//	move.Vy *= factor
-	//}
 	move.Vx *= friction
 	move.Vy *= friction
 	move.Ax = 0
 	move.Ay = 0
 	p.playPosition = *move
-	movePos := Vector{move.Vx, move.Vy, 0, 0, 0, 0}
-	return movePos
+	return Vector{move.Vx, move.Vy, 0, 0, 0, 0}
+}
+
+func (p *Player) clampToScreen() {
+	w := float64(p.sprite.Bounds().Dx())
+	h := float64(p.sprite.Bounds().Dy())
+	p.playPosition.X = math.Max(0, math.Min(float64(ScreenWidth)-w, p.playPosition.X))
+	p.playPosition.Y = math.Max(0, math.Min(float64(ScreenHeight)-h, p.playPosition.Y))
 }
 
 func (p *Player) rotate() {
@@ -135,4 +155,26 @@ func (p *Player) rotate() {
 
 func (p *Player) Collider() *Rect {
 	return newRect(p.playPosition, p.sprite)
+}
+
+func (p *Player) SetFireRate(d time.Duration) {
+	effective := time.Duration(float64(d) * p.cdMultiplier)
+	p.coldTimer.SetDuration(effective)
+}
+
+func (p *Player) ApplyPowerUp(t PowerUpType) {
+	switch t {
+	case PowerUpSilver:
+		p.cdMultiplier *= 0.5
+	case PowerUpBronze:
+		p.extraSpread++
+	case PowerUpGold:
+		p.piercingActive = true
+	}
+}
+
+func (p *Player) ResetBuffs() {
+	p.cdMultiplier = 1.0
+	p.extraSpread = 0
+	p.piercingActive = false
 }
