@@ -39,6 +39,16 @@ type Player struct {
 	cdMultiplier    float64
 	extraSpread     int
 	piercingActive  bool
+	// Phase 3: weapon system
+	weapon          *WeaponInfo
+	weaponUpgrades  int
+	// Phase 3: shield
+	shieldActive    bool
+	shieldTimer     *Timer
+	// Phase 3: speed boost
+	speedBoostActive bool
+	speedBoostTimer  *Timer
+	speedMultiplier  float64
 }
 
 func newPlayer() *Player {
@@ -53,6 +63,8 @@ func newPlayer() *Player {
 		cdMultiplier:   1.0,
 		extraSpread:    0,
 		piercingActive: false,
+		weapon:         GetWeaponInfo(WpnBlue),
+		speedMultiplier: 1.0,
 	}
 	return p
 }
@@ -170,6 +182,15 @@ func (p *Player) ApplyPowerUp(t PowerUpType) {
 		p.extraSpread++
 	case PowerUpGold:
 		p.piercingActive = true
+	case PowerUpShield:
+		p.shieldActive = true
+		p.shieldTimer = NewTimer(10 * time.Second)
+	case PowerUpHealth:
+		// Health is handled in game.go (g.Lives++)
+	case PowerUpSpeed:
+		p.speedBoostActive = true
+		p.speedMultiplier = 1.5
+		p.speedBoostTimer = NewTimer(15 * time.Second)
 	}
 }
 

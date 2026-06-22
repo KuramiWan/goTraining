@@ -12,6 +12,9 @@ const (
 	PowerUpSilver PowerUpType = iota
 	PowerUpBronze
 	PowerUpGold
+	PowerUpShield
+	PowerUpHealth
+	PowerUpSpeed
 )
 
 type PowerUp struct {
@@ -29,6 +32,12 @@ func getPowerUpSprite(t PowerUpType) *ebiten.Image {
 		return PowerUpBronzeSprite
 	case PowerUpGold:
 		return PowerUpGoldSprite
+	case PowerUpShield:
+		return PowerUpShieldSprite
+	case PowerUpHealth:
+		return PowerUpHealthSprite
+	case PowerUpSpeed:
+		return PowerUpSpeedSprite
 	}
 	return PowerUpSilverSprite
 }
@@ -59,6 +68,17 @@ func newPowerUp(t PowerUpType) *PowerUp {
 		position: pos,
 		sprite:   getPowerUpSprite(t),
 		movement: Vector{X: dx / mag * speed, Y: dy / mag * speed},
+	}
+}
+
+// newPowerUpAt creates a power-up at a specific position.
+func newPowerUpAt(x, y float64) *PowerUp {
+	t := PowerUpType(rand.Intn(6)) // random type including new ones
+	return &PowerUp{
+		pType:    t,
+		position: Vector{X: x, Y: y},
+		sprite:   getPowerUpSprite(t),
+		movement: Vector{X: (rand.Float64() - 0.5) * 2, Y: (rand.Float64() - 0.5) * 2},
 	}
 }
 
